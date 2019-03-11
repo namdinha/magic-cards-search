@@ -1,5 +1,8 @@
 from selenium import webdriver
 from selenium.webdriver.common.keys import Keys
+
+from MagicCardInstance import MagicCardInstance
+from MagicStore import MagicStore
 from MagicCard import MagicCard
 from selenium.webdriver.chrome.options import Options
 import re
@@ -19,34 +22,31 @@ class CardSearch:
 	def search_card(self, card: MagicCard, links: dict):
 		for store, link in links.items():
 			self.driver.get(link)
-
-			instances = self.driver.find_elements_by_xpath("//div[@class='itemMain']/table/tbody/tr/td[2]/div[2]/table/tbody/tr")
-			instances = instances[1:]
-			for instance in instances:
-				inst = instance.find_elements_by_xpath(".//td")
-				print(card.name + store + instance.text)
-				matching = re.search(r'  (.*?) (.*) (.*?) unid. (.*)', instance.text)
-
+			html_instances = self.driver.find_elements_by_xpath("//div[@class='itemMain']/table/tbody/tr/td[2]/div[2]/table/tbody/tr")
+			html_instances = html_instances[1:]
+			for html_instance in html_instances:
+				html_instance_attributes = html_instance.find_elements_by_xpath(".//td")
+				print(card.name + store.name + html_instance.text)
+				matching = re.search(r'  (.*?) (.*) (.*?) unid. (.*)', html_instance.text)
 				quantity = int(matching.group(3))
 				if quantity == 0:
 					break
-				edition = inst[0].find_element_by_xpath(".//a/img").get_attribute("title")
+				edition = html_instance_attributes[0].find_element_by_xpath(".//a/img").get_attribute("title")
 				language = matching.group(1)
 				quality = matching.group(2)
 				price = float(matching.group(4).split()[1].replace(".", "").replace(",", "."))
+				foil = False
+				card_instance = MagicCardInstance(price, quality, quantity, language, edition, foil, card)
+				card.add_instance(card_instance)
 
-				card.add_instance(store, price, quality, quantity, language, edition)
-
-	def search_cards(self, card_names: list, stores: list):
+	def search_cards(self, card_names: list, store_names: list):
 		cards = list()
 		for card_name in card_names:
-			self.enter_site()
 			card = MagicCard(card_name)
-			link_name = card_name.replace(" ", "+")
-			self.driver.get("https://www.ligamagic.com.br/?view=cards/card&card=" + link_name)
-			store_links = []
-			if ("Busca de Cards" in self.driver.title):
-				store_links = dict(map(lambda x: (x.find_element_by_xpath(".//img").get_attribute("title"), x.get_attribute("href")) if x.find_element_by_xpath(".//img").get_attribute("title") in stores else (None, None), self.driver.find_elements_by_xpath("//div[@class='e-col1']/a")))
+			name_to_search = card_name.replace(" ", "+")
+			self.driver.get("https://www.ligamagic.com.br/?view=cards/card&card=" + name_to_search)
+			if "Busca de Cards" in self.driver.title:
+				store_links = dict(map(lambda x: (MagicStore(x.find_element_by_xpath(".//img").get_attribute("title")), x.get_attribute("href")) if x.find_element_by_xpath(".//img").get_attribute("title") in store_names else (None, None), self.driver.find_elements_by_xpath("//div[@class='e-col1']/a")))
 				store_links.pop(None, None)
 			else:
 				continue
@@ -60,32 +60,11 @@ class CardSearch:
 		search.send_keys(card_name)
 		search.send_keys(Keys.RETURN)
 
-	def is_required_store(self, stores):
-		if any(x in self.driver.title for x in stores):
-			return True
-		else:
-			return False
-
-	def save(self, cards: list):
+	@staticmethod
+	def save(cards: list):
 		file = open("cards.txt", "a+")
-
 		for card in cards:
-			for store, instances in card.instances.items():
-				for instance in instances:
-					file.write(
-						card.name + "," + store + "," + instance.edition + "," + instance.language + "," + instance.quality + "," + str(
-							instance.quantity) + "," + str(instance.price) + "\n")
-
+			for store in MagicStore.get_all_stores():
+				for card_instance in card.get_instances_in_store(store):
+					continue
 		file.close()
-
-	def filter_cards(self, cards: list):
-
-		def getKey(item):
-			return item.price
-
-		sum(lambda card: min(card.instances.values(), key=getKey), cards)
-
-		for store, instances in card.instances.items():
-			min = instances[0]
-			for instance in instances:
-				if "SP" in instance.quality or "NM" in instance.quality:

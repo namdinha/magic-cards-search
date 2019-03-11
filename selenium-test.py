@@ -49,7 +49,7 @@ def main():
 	                         "Faith's Reward",
 	                         "Utter End"], ["Nerdz Cards", "Pharaoh\\\'s Shop", "Magicbembarato", "Bazar de Bagdá"])
 
-	search.save(r)
+	CardSearch.save(r)
 	print("debug")
 
 

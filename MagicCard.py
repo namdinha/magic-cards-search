@@ -1,8 +1,12 @@
 import MagicCardInstance
+from MagicStore import MagicStore
 
 
 class MagicCard:
+    instances = list()
+
     def __init__(self, name: str):
+        self.instances.append(self)
         self.name = name
         self.instances = list()
 
@@ -21,3 +25,5 @@ class MagicCard:
             result[card] = card.calculate_min_price()
         return result
 
+    def get_instances_in_store(self, store: MagicStore):
+        return filter(lambda x: True if store in x.stores else False, self.instances)
