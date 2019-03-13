@@ -1,5 +1,7 @@
 import MagicCard
 from CardSearch import CardSearch
+from IO import IO
+
 
 def main():
 	search = CardSearch()
@@ -49,7 +51,7 @@ def main():
 	                         "Faith's Reward",
 	                         "Utter End"], ["Nerdz Cards", "Pharaoh\\\'s Shop", "Magicbembarato", "Bazar de Bagdá"])
 
-	CardSearch.save(r)
+	IO.save(r, "testBW")
 	print("debug")
 
 

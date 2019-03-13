@@ -15,3 +15,6 @@ class MagicStore:
     @staticmethod
     def get_all_stores():
         return MagicStore.instances
+
+    def __str__(self):
+        return self.name
