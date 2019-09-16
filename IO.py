@@ -12,3 +12,4 @@ class IO:
                     file.write(str(card_instance) + "\n")
         file.write(str(MagicCard.calculate_min_price_of_deck(cards)))
         file.close()
+

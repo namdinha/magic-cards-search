@@ -17,4 +17,4 @@ class MagicCardInstance:
         self.store = store
 
     def __str__(self):
-        return str(self.card) + ',' + str(self.store) + ',' + str(self.price) + ',' + self.quality + ',' + str(self.quantity) + ',' + self.language + ',' + self.edition + ',' + str(self.foil)
+        return str(self.card) + ';' + str(self.store) + ';' + str(self.price) + ';' + self.quality + ';' + str(self.quantity) + ';' + self.language + ';' + self.edition + ';' + str(self.foil)

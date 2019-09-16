@@ -42,6 +42,7 @@ class CardSearch:
 					self.driver.find_elements_by_xpath("//div[@class='e-col1']/a")))
 				store_links.pop(None, None)
 			else:
+				print("Could not find the card: " + card_name)
 				continue
 			self.search_card(card, store_links)
 			cards.append(card)
@@ -59,4 +60,3 @@ class CardSearch:
 		price = float(matching.group(5).replace(".", "").replace(",", "."))
 		foil = True if "Foil" in matching.group(2) else False
 		return MagicCardInstance(price, quality, quantity, language, edition, foil, card, store)
-
